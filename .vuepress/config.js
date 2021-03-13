@@ -1,7 +1,7 @@
 module.exports = {
   "title": "仰望星空",
   "description": "",
-  "dest": "public",
+  "dest": "docs",
   "locales": {
     '/': {
       lang: 'zh-CN'
