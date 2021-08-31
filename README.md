@@ -1,7 +1,7 @@
 ---
 home: true
 heroText: 仰望星空
-tagline: In Code We Trust.
+tagline: In Code We Trust
 heroImageStyle: {
    width: '100%',
    display: block,

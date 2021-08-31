@@ -44,8 +44,8 @@ module.exports = {
     "type": "blog",
     "blogConfig": {
       "category": {
-        location: 1,     // 在导航栏菜单中所占的位置，默认2
-        text: '文章' // 默认文案 “分类”
+        "location": 1,     // 在导航栏菜单中所占的位置，默认2
+        "text": '文章', // 默认文案 “分类”
       },
       "tag": {
         "location": 2,
@@ -62,7 +62,8 @@ module.exports = {
     "author": "仰望星空",
     "authorAvatar": "/avatar.jfif",
     "record": "",
-    "startYear": "2021"
+    "startYear": "2021",
+    "lastUpdated": false
   },
   "markdown": {
     "lineNumbers": true
