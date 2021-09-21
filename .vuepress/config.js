@@ -12,7 +12,7 @@ module.exports = {
       "link",
       {
         "rel": "icon",
-        "href": "/favicon.jfif"
+        "href": "/avatar.jpg"
       }
     ],
     [
@@ -56,11 +56,11 @@ module.exports = {
         { icon: 'reco-npm', link: 'https://www.npmjs.com/~wishzhang' }
       ]
     },
-    "logo": "/logo.jfif",
+    "logo": "/avatar.jpg",
     "search": true,
     "searchMaxSuggestions": 10,
     "author": "仰望星空",
-    "authorAvatar": "/avatar.jfif",
+    "authorAvatar": "/avatar.jpg",
     "record": "",
     "startYear": "2021",
     "lastUpdated": false
