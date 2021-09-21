@@ -18,7 +18,7 @@ categories:
 
 字典树的基本操作是：添加单词、查找单词、匹配单词前缀。
 
-下面是字典树的 JavaScript 代码实现：
+下面给出字典树的 JavaScript 代码实现：
 
 ```javascript
 /**
