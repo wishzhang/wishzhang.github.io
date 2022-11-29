@@ -27,6 +27,22 @@ module.exports = {
   ],
   "theme": "reco",
   "themeConfig": {
+    // https://vuepress-theme-reco.recoluan.com/
+    // https://console.leancloud.cn/
+    // wishzhang.io@qq.com/Zleancloud123
+    valineConfig: {
+      // 默认所有页面是否加载评论
+      // 在单独的md文件不加载评论，可以在md里标记 isShowComments: false
+      showComment: true,
+      appId: 'nbv8DpgadE91qfxPrV9KeZNs-gzGzoHsz',
+      appKey: '00ZmPADjmjBd3ZV69Z6xLYyc',
+      // https://valine.js.org/avatar.html
+      avatar: 'hide',
+      // 阅读量统计
+      visitor: true,
+      meta: ['nick'],
+      pageSize: 20
+    },
     "subSidebar": 'auto',
     "mode": "light",
     "nav": [

@@ -1,3 +1,137 @@
-.footer{
+.footer {
   display true;
+}
+
+.valine-wrapper {
+
+  #valine {
+    * {
+      font-family: Ubuntu, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    }
+
+    /*编辑器公共样式*/
+    .vwrap{
+      background: rgba(247,248,250,.7) !important;
+
+      .cancel-reply-btn{
+        top: 10px;
+        right: 10px;
+        border: none !important;
+        width 18px;
+        height: 18px;
+        color: #8a919f;
+      }
+
+      .vedit {
+        .vinput{
+          color: #252933 !important;
+        }
+        >.vrow {
+          display none !important;
+        }
+      }
+
+      >.vrow{
+        padding-bottom 2px !important;
+        padding-right 6px !important;
+        .vcol:first-child{
+          display: none;
+        }
+        .vcol{
+          width: 100%;
+        }
+
+        .vsubmit{
+          width: 80px !important;
+          font-size 14px !important;
+        }
+      }
+    }
+
+    /*end*/
+
+    /*评论公共样式*/
+    .vreply-wrapper{
+      .vwrap{
+        border: none !important;
+      }
+    }
+    .vquote{
+      background: rgba(247,248,250,.7) !important;
+      .vcard{
+        padding-top: 0px !important;
+      }
+      .vmeta{
+        margin-bottom:0 !important;
+        padding-right 8px !important;
+      }
+      .vcontent{
+        padding: 8px 0!important;
+      }
+    }
+    /*end*/
+
+    .vcount{
+      padding: 0;
+      margin-top: 48px;
+    }
+
+    .vpanel{
+    }
+
+    .vcards{
+      .vcard {
+        padding-top: 16px;
+        .vh{
+          .vhead{
+            .vsys {
+              display: none;
+            }
+          }
+
+          .vmeta{
+            margin-bottom 8px;
+            >.vtime{
+              color: #8a919f;
+            }
+            >.vat{
+              position relative;
+              top: -4px;
+              margin-right 0;
+              padding: 0px 8px;
+              color: #8a919f;
+              border: 1px solid #efefef;
+              background: white !important;
+            }
+          }
+
+
+          .vcontent{
+            margin: 0;
+            padding: 8px 16px 8px;
+            color: #515767 !important;
+            background: rgba(247,248,250,.7);
+            >p {
+              margin: 0;
+              color: #515767 !important;
+            }
+          }
+
+          .vreply-wrapper{
+
+          }
+        }
+
+      }
+
+    }
+
+    .vempty{
+      display: none !important;
+    }
+
+    .vpower{
+      display none !important;
+    }
+  }
 }
