@@ -10,5 +10,10 @@
     "vuepress": "1.9.7",
     "vuepress-theme-reco": "1.6.16"
   },
-  "description": "wishzhang's blog"
+  "description": "wishzhang's blog",
+  "dependencies": {
+    "@vuepress-reco/vuepress-plugin-bgm-player": "^1.1.4",
+    "@vuepress-reco/vuepress-plugin-screenfull": "^1.0.1",
+    "vuepress-plugin-sponsor": "^1.0.0"
+  }
 }

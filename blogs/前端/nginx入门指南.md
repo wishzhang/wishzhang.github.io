@@ -9,6 +9,7 @@ categories:
 
  - 前端
 
+showSponsor: true
 
 ---
 
