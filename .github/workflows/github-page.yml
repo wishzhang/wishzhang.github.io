@@ -1,4 +1,4 @@
-name: docs
+name: Deploy To Github Page
 
 on:
   # 每当 push 到 main 分支时触发部署
@@ -22,10 +22,6 @@ jobs:
         with:
           # 选择要使用的 node 版本
           node-version: '16.15.0'
-
-      # 当前目录
-      - name: Address docs root directory
-        run: ls -l
 
       # 缓存 node_modules
       - name: Cache dependencies

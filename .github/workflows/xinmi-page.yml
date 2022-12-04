@@ -1,4 +1,4 @@
-name: docs
+name: Deploy To Tencent Server
 
 on:
   # 每当 push 到 main 分支时触发部署
@@ -52,14 +52,15 @@ jobs:
       - name: Build VuePress site
         run: npm run build
 
-          # 上传打包资源
+      # 上传
+      - uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: ${{ env.SERVER_PRIVATE_KEY }}
+
+      # 使用 ssh-keyscan 命令扫描我们服务器的公钥并保存到github actions虚拟环境的 ~/.ssh/known_hosts 中，用于工作流的无人值守
+      - name: Scan public keys
+        run: ssh-keyscan ${{ env.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      # 部署 通过rsync将虚拟环境下编译好的目录同步到我们的服务器指定目录下。rsync --delete会删除目的目录中不在源目录中的文件。
       - name: Deploy
-        uses: easingthemes/ssh-deploy@v2.0.7
-        env:
-         SSH_PRIVATE_KEY: ${{ env.SERVER_PRIVATE_KEY }}
-         ARGS: '-avz --delete'
-         SOURCE: 'docs/'
-         REMOTE_HOST: ${{ env.SERVER_HOST }}
-         REMOTE_USER: ${{ env.SERVER_USER_NAME }}
-          # 服务器目标路径
-         TARGET: /usr/local/nginx/html/docs
+        run: rsync -av --delete docs root@${{ secrets.SERVER_HOST }}:/usr/local/nginx/html
