@@ -64,4 +64,4 @@ jobs:
 
       # 部署 通过rsync将虚拟环境下编译好的public目录同步到我们的服务器指定目录下。rsync --delete会删除目的目录中不在源目录中的文件。
       - name: Deploy
-        run: rsync -av --delete docs root@${{ secrets.SERVER_HOST }}:/usr/local/nginx/html/docs
+        run: rsync -av --delete docs root@${{ secrets.SERVER_HOST }}:/usr/local/nginx/html
