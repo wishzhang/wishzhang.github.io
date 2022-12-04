@@ -7,6 +7,11 @@ on:
   # 手动触发部署
   workflow_dispatch:
 
+env:
+  SERVER_PRIVATE_KEY: ${{ secrets.SERVER_PRIVATE_KEY }} # 服务器私钥
+  SERVER_HOST: ${{ secrets.SERVER_HOST }} # 服务器IP地址
+  SERVER_USER_NAME: ${{ secrets.SERVER_USER_NAME }} # 服务器用户名
+
 jobs:
   docs:
     runs-on: ubuntu-latest
