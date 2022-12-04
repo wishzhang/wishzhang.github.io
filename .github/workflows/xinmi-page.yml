@@ -52,12 +52,16 @@ jobs:
       - name: Build VuePress site
         run: npm run build
 
-          # 上传打包资源
-      - name: Upload
-        uses: appleboy/scp-action@master
+      # 上传
+      # 使用第三方action，用于ssh私钥缓存  secrets.BLOG_DEPLOY_KEY这个变量会在github项目setting->secret中设置，后面介绍
+      - uses: webfactory/ssh-agent@v0.4.1 
         with:
-          host: ${{ env.SERVER_HOST }} # 公网ip
-          username: ${{ env.SERVER_USER_NAME }} # 用户名
-          key: ${{ env.SERVER_PRIVATE_KEY }} # 私钥
-          source: "docs/" # 发送文件
-          target: "/usr/local/nginx/html/docs" # 目标目录
+         ssh-private-key: ${{ env.SERVER_PRIVATE_KEY }}
+
+      # 使用 ssh-keyscan 命令扫描我们服务器的公钥并保存到github actions虚拟环境的 ~/.ssh/known_hosts 中，用于工作流的无人值守
+      - name: Scan public keys
+        run: ssh-keyscan ${{ env.SERVER_HOST }} >> ~/.ssh/known_hosts            
+
+      # 部署 通过rsync将虚拟环境下编译好的public目录同步到我们的服务器指定目录下。rsync --delete会删除目的目录中不在源目录中的文件。
+      - name: Deploy
+        run: rsync -av --delete docs root@${{ secrets.SERVER_HOST }}:/usr/local/nginx/html/docs
