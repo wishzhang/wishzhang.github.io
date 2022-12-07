@@ -41,7 +41,7 @@ module.exports = {
     [
       '@vuepress-reco/vuepress-plugin-bgm-player',
       {
-        autoplay: true,
+        autoplay: false,
         shrinkMode: 'float',
         autoShrink: true,
         position: {left: '10px', bottom: '10px', 'z-index': '999999'},
@@ -128,7 +128,6 @@ module.exports = {
   },
   "markdown":
     {
-      "lineNumbers":
-        true
+      "lineNumbers": false
     }
 }

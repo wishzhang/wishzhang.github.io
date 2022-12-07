@@ -1,5 +1,8 @@
+@import "variables.styl";
+@import "overwrite.styl";
+
 .footer {
-  display true;
+  display: true;
 }
 
 .valine-wrapper {
@@ -18,7 +21,7 @@
         top: 10px;
         right: 10px;
         border: none !important;
-        width 18px;
+        width: 18px;
         height: 18px;
         color: #8a919f;
       }
@@ -29,13 +32,13 @@
         }
 
         > .vrow {
-          display none !important;
+          display: none !important;
         }
       }
 
       > .vrow {
-        padding-bottom 2px !important;
-        padding-right 6px !important;
+        padding-bottom: 2px !important;
+        padding-right: 6px !important;
 
         .vcol:first-child {
           display: none;
@@ -47,7 +50,7 @@
 
         .vsubmit {
           width: 80px !important;
-          font-size 14px !important;
+          font-size: 14px !important;
         }
       }
     }
@@ -71,7 +74,7 @@
 
       .vmeta {
         margin-bottom: 0 !important;
-        padding-right 8px !important;
+        padding-right: 8px !important;
       }
 
       .vcontent {
@@ -101,16 +104,16 @@
           }
 
           .vmeta {
-            margin-bottom 8px;
+            margin-bottom: 8px;
 
             > .vtime {
               color: #8a919f;
             }
 
             > .vat {
-              position relative;
+              position: relative;
               top: -4px;
-              margin-right 0;
+              margin-right: 0;
               padding: 0px 8px;
               color: #8a919f;
               border: 1px solid #efefef;
@@ -145,14 +148,14 @@
     }
 
     .vpower {
-      display none !important;
+      display: none !important;
     }
   }
 }
 
 .sponsor-container {
-  padding-right 224px !important;
-  margin-bottom 200px !important;
+  padding-right: 224px !important;
+  margin-bottom: 200px !important;
 
   .sponsor-love {
     transform: none !important;
@@ -177,11 +180,57 @@
     font-size: 14px;
 
     i {
-      min-width 26px;
+      min-width: 26px;
     }
   }
 }
 
 .reco-float-box {
   background-color: transparent !important;
+}
+
+// table
+table {
+  display: table;
+  width: 100% !important; /*表格宽度*/
+  max-width: 65em; /*表格最大宽度，避免表格过宽*/
+  margin: 16px auto; /*外边距*/
+  border-collapse: collapse !important; /*使用单一线条的边框*/
+  empty-cells: show !important; /*单元格无内容依旧绘制边框*/
+
+  tr {
+    border: none !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  th, td {
+    height: 35px; /*统一每一行的默认高度*/
+    border: 1px solid var(--c-border) !important; /*内部边框样式*/
+    background: white;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  th {
+    font-weight: bold; /*加粗*/
+    background: var(--c-brand-light); /*背景色*/
+    text-align: left !important;
+    white-space: nowrap; /*表头内容强制在一行显示*/
+    padding: 4px 12px; /*内边距*/
+  }
+
+
+  td:nth-child(1) {
+    width: 120px !important;
+    white-space: nowrap;
+  }
+
+  td:nth-child(2) {
+    min-width: 200px !important;
+  }
+
+  td {
+    padding: 8px 12px; /*内边距*/
+  }
 }

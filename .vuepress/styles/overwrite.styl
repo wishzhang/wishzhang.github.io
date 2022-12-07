@@ -1,0 +1,55 @@
+table {
+  display: table;
+  width: 100% !important; /*表格宽度*/
+  max-width: 65em; /*表格最大宽度，避免表格过宽*/
+  margin: 16px auto; /*外边距*/
+  border-collapse: collapse !important; /*使用单一线条的边框*/
+  empty-cells: show !important; /*单元格无内容依旧绘制边框*/
+
+  tr {
+    border: none !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  th, td {
+    height: 35px; /*统一每一行的默认高度*/
+    border: 1px solid var(--c-border) !important; /*内部边框样式*/
+    background: white;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  th {
+    font-weight: bold; /*加粗*/
+    background: var(--c-brand-light); /*背景色*/
+    text-align: left !important;
+    white-space: nowrap; /*表头内容强制在一行显示*/
+    padding: 4px 12px; /*内边距*/
+  }
+
+
+  td:nth-child(1) {
+    width: 120px !important;
+    white-space: nowrap;
+  }
+
+  td:nth-child(2) {
+    min-width: 200px !important;
+  }
+
+  td {
+    padding: 8px 12px; /*内边距*/
+  }
+}
+
+p > code {
+  word-break: break-word !important;
+  border-radius: 2px !important;
+  overflow-x: auto !important;
+  background-color: #fff5f5 !important;
+  color: #ff502c !important;
+  font-size: .87em !important;
+  padding: 0.065em 0.4em !important;
+  font-family: Menlo, Monaco, Consolas, Courier New, monospace !important;
+}
