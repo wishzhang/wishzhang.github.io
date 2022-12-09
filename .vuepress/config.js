@@ -128,6 +128,6 @@ module.exports = {
   },
   "markdown":
     {
-      "lineNumbers": false
+      "lineNumbers": true
     }
 }

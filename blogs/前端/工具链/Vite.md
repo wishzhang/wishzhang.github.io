@@ -596,5 +596,522 @@ cli.parse()
 
 
 
+### 入口流程（2. 创建Server)
+
+:::details packages/vite/src/node/server/index.ts 简化后的代码
+
+```js
+import connect from 'connect'
+import chokidar from 'chokidar'
+
+export async function createServer(
+  inlineConfig: InlineConfig = {},
+): Promise<ViteDevServer> {
+  const config = await resolveConfig(inlineConfig, 'serve')
+  const { root, server: serverConfig } = config
+  const httpsOptions = await resolveHttpsConfig(config.server.https)
+  const { middlewareMode } = serverConfig
+
+  const resolvedWatchOptions = resolveChokidarOptions(config, {
+    disableGlobbing: true,
+    ...serverConfig.watch,
+  })
+
+  const middlewares = connect() as Connect.Server
+  const httpServer = middlewareMode
+    ? null
+    : await resolveHttpServer(serverConfig, middlewares, httpsOptions)
+  const ws = createWebSocketServer(httpServer, config, httpsOptions)
+
+  const watcher = chokidar.watch(
+    path.resolve(root),
+    resolvedWatchOptions,
+  ) as FSWatcher
+
+  const moduleGraph: ModuleGraph = new ModuleGraph((url, ssr) =>
+    container.resolveId(url, undefined, { ssr }),
+  )
+
+  const container = await createPluginContainer(config, moduleGraph, watcher)
+  const closeHttpServer = createServerCloseFn(httpServer)
+
+  let exitProcess: () => void
+
+  const server: ViteDevServer = {
+    config,
+    middlewares,
+    httpServer,
+    watcher,
+    pluginContainer: container,
+    ws,
+    moduleGraph,
+    resolvedUrls: null, // will be set on listen
+    async listen(port?: number, isRestart?: boolean) {
+      await startServer(server, port, isRestart)
+      if (httpServer) {
+        server.resolvedUrls = await resolveServerUrls(
+          httpServer,
+          config.server,
+          config,
+        )
+      }
+      return server
+    },
+    async restart(forceOptimize?: boolean) {
+      if (!server._restartPromise) {
+        server._forceOptimizeOnRestart = !!forceOptimize
+        server._restartPromise = restartServer(server).finally(() => {
+          server._restartPromise = null
+          server._forceOptimizeOnRestart = false
+        })
+      }
+      return server._restartPromise
+    }
+  }
+
+  server.transformIndexHtml = createDevHtmlTransformFn(server)
+
+  watcher.on('change', async (file) => {
+    file = normalizePath(file)
+    if (file.endsWith('/package.json')) {
+      return invalidatePackageData(packageCache, file)
+    }
+    // invalidate module graph cache on file change
+    moduleGraph.onFileChange(file)
+    if (serverConfig.hmr !== false) {
+      try {
+        await handleHMRUpdate(file, server)
+      } catch (err) {
+        ws.send({
+          type: 'error',
+          err: prepareError(err),
+        })
+      }
+    }
+  })
+
+  watcher.on('add', (file) => {
+    handleFileAddUnlink(normalizePath(file), server)
+  })
+  watcher.on('unlink', (file) => {
+    handleFileAddUnlink(normalizePath(file), server)
+  })
+
+  ws.on('vite:invalidate', async ({ path, message }: InvalidatePayload) => {
+    const mod = moduleGraph.urlToModuleMap.get(path)
+    if (mod && mod.isSelfAccepting && mod.lastHMRTimestamp > 0) {
+      config.logger.info(
+        colors.yellow(`hmr invalidate `) +
+          colors.dim(path) +
+          (message ? ` ${message}` : ''),
+        { timestamp: true },
+      )
+      const file = getShortName(mod.file!, config.root)
+      updateModules(
+        file,
+        [...mod.importers],
+        mod.lastHMRTimestamp,
+        server,
+        true,
+      )
+    }
+  })
+
+  // Internal middlewares
+
+  return server
+}
+```
+
+:::
+
+可以看到创建Server的流程，主要有以下几个部分组成：
+
+- http server
+- ws server
+- watcher
+- middleware 
+- server对象
+
+通过使用 [connect](https://www.npmjs.com/package/connect) 包来创建 http server 和中间件处理，使用了 [ws](https://github.com/websockets/ws) 包来创建 ws server，使用 [chokidar ](https://www.npmjs.com/package/chokidar)来创建watcher。
+
+#### **创建 http server**
+
+这个过程大致是读取配置，然后创建一个 http server，没有特别要注意的地方。
+
+```ts
+const config = await resolveConfig(inlineConfig, 'serve')
+  const { root, server: serverConfig } = config
+  const httpsOptions = await resolveHttpsConfig(config.server.https)
+  const { middlewareMode } = serverConfig
+  const middlewares = connect() as Connect.Server
+  
+  const httpServer = middlewareMode
+    ? null
+    : await resolveHttpServer(serverConfig, middlewares, httpsOptions)
+```
+
+#### **创建 ws server**
+
+创建 ws server 的过程，可以知道是使用了 [ws](https://github.com/websockets/ws) 包来创建 ws server，并封装了几个通信的 API。
+
+:::details code
+
+```ts
+import { WebSocketServer as WebSocketServerRaw } from 'ws'
+export function createWebSocketServer(
+  server: Server | null,
+  config: ResolvedConfig,
+  httpsOptions?: HttpsServerOptions,
+): WebSocketServer {
+  let wss: WebSocketServerRaw
+
+  wss = new WebSocketServerRaw({ noServer: true })
+
+  wss.on('connection', (socket) => {
+    socket.on('message', (raw) => {
+      if (!customListeners.size) return
+      let parsed: any
+      try {
+        parsed = JSON.parse(String(raw))
+      } catch {}
+      if (!parsed || parsed.type !== 'custom' || !parsed.event) return
+      const listeners = customListeners.get(parsed.event)
+      if (!listeners?.size) return
+      const client = getSocketClient(socket)
+      listeners.forEach((listener) => listener(parsed.data, client))
+    })
+    socket.send(JSON.stringify({ type: 'connected' }))
+    if (bufferedError) {
+      socket.send(JSON.stringify(bufferedError))
+      bufferedError = null
+    }
+  })
+
+  // Provide a wrapper to the ws client so we can send messages in JSON format
+  // To be consistent with server.ws.send
+  function getSocketClient(socket: WebSocketRaw) {
+    if (!clientsMap.has(socket)) {
+      clientsMap.set(socket, {
+        send: (...args) => {
+          let payload: HMRPayload
+          if (typeof args[0] === 'string') {
+            payload = {
+              type: 'custom',
+              event: args[0],
+              data: args[1],
+            }
+          } else {
+            payload = args[0]
+          }
+          socket.send(JSON.stringify(payload))
+        },
+        socket,
+      })
+    }
+    return clientsMap.get(socket)!
+  }
+
+  return {
+    on: ((event: string, fn: () => void) => {
+      if (wsServerEvents.includes(event)) wss.on(event, fn)
+      else {
+        if (!customListeners.has(event)) {
+          customListeners.set(event, new Set())
+        }
+        customListeners.get(event)!.add(fn)
+      }
+    }) as WebSocketServer['on'],
+    get clients() {
+      return new Set(Array.from(wss.clients).map(getSocketClient))
+    },
+    send(...args: any[]) {
+      let payload: HMRPayload
+      if (typeof args[0] === 'string') {
+        payload = {
+          type: 'custom',
+          event: args[0],
+          data: args[1],
+        }
+      } else {
+        payload = args[0]
+      }
+
+      const stringified = JSON.stringify(payload)
+      wss.clients.forEach((client) => {
+        // readyState 1 means the connection is open
+        if (client.readyState === 1) {
+          client.send(stringified)
+        }
+      })
+    },
+  }
+}
+```
+
+::::
+
+接下来看看 watcher。
+
+**watcher**
+
+创建 watcher，这里边用到了 [fast-glob](https://www.npmjs.com/package/fast-glob) 工具库。
+
+:::details code
+
+```ts
+import glob from 'fast-glob'
+
+export function resolveChokidarOptions(
+  config: ResolvedConfig,
+  options: WatchOptions | undefined,
+): WatchOptions {
+  const { ignored = [], ...otherOptions } = options ?? {}
+
+  const resolvedWatchOptions: WatchOptions = {
+    ignored: [
+      '**/.git/**',
+      '**/node_modules/**',
+      '**/test-results/**', // Playwright
+      glob.escapePath(config.cacheDir) + '/**',
+      ...(Array.isArray(ignored) ? ignored : [ignored]),
+    ],
+    ignoreInitial: true,
+    ignorePermissionErrors: true,
+    ...otherOptions,
+  }
+
+  return resolvedWatchOptions
+}
+  
+  const resolvedWatchOptions = resolveChokidarOptions(config, {
+    disableGlobbing: true,
+    ...serverConfig.watch,
+  })
+  
+  const watcher = chokidar.watch(
+    path.resolve(root),
+    resolvedWatchOptions,
+  ) as FSWatcher
+```
+
+:::
+
+当我们修改了 IDE 的代码文件时，触发了 change 事件。然后主要调用了 `moduleGraph.onFileChange(file)` 和 `handleHMRUpdate(file, server)` 方法。
+
+```ts{7,10}
+watcher.on('change', async (file) => {
+    file = normalizePath(file)
+    if (file.endsWith('/package.json')) {
+      return invalidatePackageData(packageCache, file)
+    }
+    // invalidate module graph cache on file change
+    moduleGraph.onFileChange(file)
+    if (serverConfig.hmr !== false) {
+      try {
+        await handleHMRUpdate(file, server)
+      } catch (err) {
+        ws.send({
+          type: 'error',
+          err: prepareError(err),
+        })
+      }
+    }
+  })
+```
+
+里边的代码还是很多的，比较复杂。`moduleGraph`这个对象是存储了全局的文件-模块关系Map，来看一下单个的数据结构：
+
+```ts
+export class ModuleNode {
+  /**
+   * Public served url path, starts with /
+   */
+  url: string
+  /**
+   * Resolved file system path + query
+   */
+  id: string | null = null
+  file: string | null = null
+  type: 'js' | 'css'
+  info?: ModuleInfo
+  meta?: Record<string, any>
+  importers = new Set<ModuleNode>()
+  importedModules = new Set<ModuleNode>()
+  acceptedHmrDeps = new Set<ModuleNode>()
+  acceptedHmrExports: Set<string> | null = null
+  importedBindings: Map<string, Set<string>> | null = null
+  isSelfAccepting?: boolean
+  transformResult: TransformResult | null = null
+  ssrTransformResult: TransformResult | null = null
+  ssrModule: Record<string, any> | null = null
+  ssrError: Error | null = null
+  lastHMRTimestamp = 0
+  lastInvalidationTimestamp = 0
+
+  /**
+   * @param setIsSelfAccepting - set `false` to set `isSelfAccepting` later. e.g. #7870
+   */
+  constructor(url: string, setIsSelfAccepting = true) {
+    this.url = url
+    this.type = isDirectCSSRequest(url) ? 'css' : 'js'
+    if (setIsSelfAccepting) {
+      this.isSelfAccepting = false
+    }
+  }
+}
+```
+
+`fileToModulesMap = new Map<string, Set<ModuleNode>>()` 每个文件对应一个 `ModuleNode` 的集合。
+
+在来看下 `handleHMRUpdate()` 方法，这里面有一系列的判断是重载所有代码的，最后才调用 `updateModules(shortFile, hmrContext.modules, timestamp, server)` 方法。
+
+:::details code
+
+```ts{83}
+export async function handleHMRUpdate(
+  file: string,
+  server: ViteDevServer,
+): Promise<void> {
+  const { ws, config, moduleGraph } = server
+  const shortFile = getShortName(file, config.root)
+  const fileName = path.basename(file)
+
+  const isConfig = file === config.configFile
+  const isConfigDependency = config.configFileDependencies.some(
+    (name) => file === name,
+  )
+  const isEnv =
+    config.inlineConfig.envFile !== false &&
+    (fileName === '.env' || fileName.startsWith('.env.'))
+  if (isConfig || isConfigDependency || isEnv) {
+    // auto restart server
+    debugHmr(`[config change] ${colors.dim(shortFile)}`)
+    config.logger.info(
+      colors.green(
+        `${path.relative(process.cwd(), file)} changed, restarting server...`,
+      ),
+      { clear: true, timestamp: true },
+    )
+    try {
+      await server.restart()
+    } catch (e) {
+      config.logger.error(colors.red(e))
+    }
+    return
+  }
+
+  debugHmr(`[file change] ${colors.dim(shortFile)}`)
+
+  // (dev only) the client itself cannot be hot updated.
+  if (file.startsWith(normalizedClientDir)) {
+    ws.send({
+      type: 'full-reload',
+      path: '*',
+    })
+    return
+  }
+
+  const mods = moduleGraph.getModulesByFile(file)
+
+  // check if any plugin wants to perform custom HMR handling
+  const timestamp = Date.now()
+  const hmrContext: HmrContext = {
+    file,
+    timestamp,
+    modules: mods ? [...mods] : [],
+    read: () => readModifiedFile(file),
+    server,
+  }
+
+  for (const hook of config.getSortedPluginHooks('handleHotUpdate')) {
+    const filteredModules = await hook(hmrContext)
+    if (filteredModules) {
+      hmrContext.modules = filteredModules
+    }
+  }
+
+  if (!hmrContext.modules.length) {
+    // html file cannot be hot updated
+    if (file.endsWith('.html')) {
+      config.logger.info(colors.green(`page reload `) + colors.dim(shortFile), {
+        clear: true,
+        timestamp: true,
+      })
+      ws.send({
+        type: 'full-reload',
+        path: config.server.middlewareMode
+          ? '*'
+          : '/' + normalizePath(path.relative(config.root, file)),
+      })
+    } else {
+      // loaded but not in the module graph, probably not js
+      debugHmr(`[no modules matched] ${colors.dim(shortFile)}`)
+    }
+    return
+  }
+
+  updateModules(shortFile, hmrContext.modules, timestamp, server)
+}
+```
 
 
+
+:::
+
+最后在 `updateModules ` 这个方法判断并发送给浏览器更新的文件：
+
+:::details code
+
+```ts
+export function updateModules(
+  file: string,
+  modules: ModuleNode[],
+  timestamp: number,
+  { config, ws }: ViteDevServer,
+  afterInvalidation?: boolean,
+): void {
+  const updates: Update[] = []
+  const invalidatedModules = new Set<ModuleNode>()
+  let needFullReload = false
+
+  for (const mod of modules) {
+    invalidate(mod, timestamp, invalidatedModules)
+    if (needFullReload) {
+      continue
+    }
+
+    const boundaries = new Set<{
+      boundary: ModuleNode
+      acceptedVia: ModuleNode
+    }>()
+    const hasDeadEnd = propagateUpdate(mod, boundaries)
+    if (hasDeadEnd) {
+      needFullReload = true
+      continue
+    }
+
+    updates.push(
+      ...[...boundaries].map(({ boundary, acceptedVia }) => ({
+        type: `${boundary.type}-update` as const,
+        timestamp,
+        path: normalizeHmrUrl(boundary.url),
+        explicitImportRequired:
+          boundary.type === 'js'
+            ? isExplicitImportRequired(acceptedVia.url)
+            : undefined,
+        acceptedPath: normalizeHmrUrl(acceptedVia.url),
+      })),
+    )
+  }
+
+  ws.send({
+    type: 'update',
+    updates,
+  })
+}
+```
+
+:::
+
+Vite 源码分析暂告一段落了，毕竟这样分析下去会很复杂吃力不讨好，项目本身也经过了几年的迭代了。后面需要再深入源码的话，可以从测试用例开始。然后需要了解的是如何编写 Vite 的插件。
