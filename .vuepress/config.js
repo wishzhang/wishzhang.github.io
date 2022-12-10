@@ -54,7 +54,7 @@ module.exports = {
             name: '如果有一天',
             artist: '梁静茹',
             url: 'https://mp3.gobluebell.com/music/%e6%a2%81%e9%9d%99%e8%8c%b9-%e5%a6%82%e6%9e%9c%e6%9c%89%e4%b8%80%e5%a4%a9.mp3',
-            cover: 'https://cdn.jsdelivr.net/gh/wishzhang/assets/wish-blog/music/cover1.png'
+            cover: 'https://fastly.jsdelivr.net/gh/wishzhang/assets/wish-blog/music/cover1.png'
           }
         ]
       }
