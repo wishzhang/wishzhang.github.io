@@ -9,7 +9,7 @@ heroImageStyle: {
    borderRadius: '1rem',
    color: white
  }
-bgImage: 'https://fastly.jsdelivr.net/gh/wishzhang/assets/wish-blog/bg.jpg'
+bgImage: 'https://gcore.jsdelivr.net/gh/wishzhang/assets/wish-blog/bg.jpg'
 bgImageStyle: {
   height: '460px',
   color: white
