@@ -1115,3 +1115,39 @@ export function updateModules(
 :::
 
 Vite 源码分析暂告一段落了，毕竟这样分析下去会很复杂吃力不讨好，项目本身也经过了几年的迭代了。后面需要再深入源码的话，可以从测试用例开始。然后需要了解的是如何编写 Vite 的插件。
+
+
+
+## Vite 插件
+
+先过一下 [Vite 插件](https://cn.vitejs.dev/guide/api-plugin.html) 的功能介绍。然后笔者就挑了这个插件来看 [@vitejs/plugin-vue](https://www.npmjs.com/package/@vitejs/plugin-vue) 。拉下源码捣鼓了一下发现，底层工具链要求具备的知识完全不一样。总之，调试和测试这个插件的源代码这个先放下吧，直接看下这个插件的源码流程。
+
+插件的引入：
+
+```js
+// vite.config.js
+import vue from '@vitejs/plugin-vue'
+
+export default {
+  plugins: [vue()],
+}
+```
+
+源码入口在 [packages/plugin-vue/src/index.ts](https://github.com/vitejs/vite-plugin-vue/blob/main/packages/plugin-vue/src/index.ts)
+
+插件对象有以下几个方法属性：
+
+- name  值为 vite:vue ，暂时不懂这里为什么这么写。但package.json是按照插件命名规范的 `@vitejs/plugin-vue`
+- handleHotUpdate() Vite独有的钩子，执行自定义 HMR 更新处理。
+- config() Vite独有的钩子，在解析 Vite 配置前调用。
+- configResolved() Vite独有的钩子，在解析 Vite 配置后调用。
+- configureServer() Vite独有的钩子，是用于配置开发服务器的钩子。
+- buildStart() 通用钩子，
+- resolveId() 通用钩子
+- load() 通用钩子
+- transform() 通用钩子
+
+笔者看了源码的代码很复杂，主要还使用了 @vue/compiler-sfc。再分析下去就举步维艰了，也没多大意义了。遇到这种情况怎么办呢？
+
+**目前比较好的办法是新开一个自己的 playground 去跑示例 demo，熟悉主要的 API（目前很多项目没有详细的   playground，源码测试用例也是异构的没那么方便，这种情况下就必须自己已经具备熟悉 API 的先决条件。软件的现状就是这样。熟悉API最好的方式是看文档然后自己运行示例，如果官方有详细的示例就好了，但很多是没有的）。熟悉 API 后，如果需要再深入，建议是看 test 用例和使用调试的方式。**
+
