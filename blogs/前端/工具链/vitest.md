@@ -27,6 +27,7 @@ vue3 官网推荐首先的是 [vue-testing-library](https://testing-library.com/
 ```sh
 npm install -D vitest
 npm install -D @vue/test-utils
+npm install -D @vitest/coverage-c8
 ```
 
 在 package.json 写上：
