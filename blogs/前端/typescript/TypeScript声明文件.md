@@ -128,6 +128,57 @@ declare namespace foo {
 
 ts 提供代码的类型检查、编译功能，但 IDE 的智能提示功能是 IDE 提供的。其中啥原理了解一点示例就行。
 
+::: warning 注意
+
+IDE 的智能提示是可能出错的。当可以从入口知道的抛出的这些类型，则是可以找的到的。
+
+但还有一些提示是需要 IDE 来处理，不同IDE有不同的处理方式。
+
+:::
+
+## 其它
+
+- exports field of packages.json
+
+[exports](https://webpack.js.org/guides/package-exports/)字段不是 packages.json 的标准字段，而是 wepack、rollup、vite 等打包工具另外实现的字段。这个字段的作用是定义了 npm 包与外界引入方式的映射，解耦了 npm 包内部的文件夹结构与引入姿势的耦合。
+
+来看一个具体的示例：
+
+```json
+{
+  "main": "dist/index.full.js",
+  "module": "dist/index.full.mjs",
+  "types": "es/packages/cvue/index.d.ts",
+  "unpkg": "dist/index.full.js",
+  "jsdelivr": "dist/index.full.js",
+  "exports": {
+    ".": {
+      "types": "./es/packages/cvue/index.d.ts",
+      "import": "./es/packages/cvue/index.mjs",
+      "require": "./lib/packages/cvue/index.js"
+    },
+    "./es": "./es/packages/cvue/index.mjs",
+    "./lib": "./lib/packages/cvue/index.js",
+    "./es/*.mjs": "./es/packages/cvue/*.mjs",
+    "./es/*": "./es/packages/cvue/*.mjs",
+    "./lib/*.js": "./lib/packages/cvue/*.js",
+    "./lib/*": "./lib/packages/cvue/*.js",
+    "./*": "./*"
+  }
+}
+```
+
+如果都支持，打包工具会优先选择 exports 字段而不是 types字段。将 类型声明代码 按路径都导出去。
+IDE会沿着入口找到类型声明，比如：
+
+```typescript
+import type {CvueTestProps} from '@wele/cvue'
+
+let t: CvueTestProps
+```
+
+如果没按路径找到，其实IDE也会全局去找类型声明，但 import 的路径不一定是正确的，因为内部结构不一定符合IDE要求（一般是 node 查找规则的那种）。
+
 
 
 
