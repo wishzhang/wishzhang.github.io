@@ -31,14 +31,15 @@ showSponsor: true
 
 上面这几个字段是最基本的配置（只配置了这些字段就可以发布），这里说明一下这些字段的含义：
 
-| 字段名  | 说明                                                         |
-| ------- | ------------------------------------------------------------ |
-| name    | 包名。如上面的包名当被安装的时候执行：`npm install --save @wishzhang/tool`，这里使用了 @wishzhang 命名空间，这里的命名空间需要是 npm 的账号名或另外申请的一个组织名 |
-| version | 版本号                                                       |
-| main    | 当不是通过 ES6 module 引入或没有声明 module 字段的时候，引入 npm 包会找到这个入口 |
-| module  | 当使用 ES6 module 的时候，会找到这个入口                     |
-| types   | TS 类型声明文件的入口                                        |
-| files   | 发布后 npm 里包含的文件                                      |
+| 字段名           | 说明                                                         |
+| ---------------- | ------------------------------------------------------------ |
+| name             | 包名。如上面的包名当被安装的时候执行：`npm install --save @wishzhang/tool`，这里使用了 @wishzhang 命名空间，这里的命名空间需要是 npm 的账号名或另外申请的一个组织名 |
+| version          | 版本号                                                       |
+| main             | 当不是通过 ES6 module 引入或没有声明 module 字段的时候，引入 npm 包会找到这个入口 |
+| module           | 当使用 ES6 module 的时候，会找到这个入口                     |
+| types            | TS 类型声明文件的入口                                        |
+| files            | 发布后 npm 里包含的文件                                      |
+| peerDependencies | 表示宿主环境如果使用该npm包需要满足安装这里声明的条件的依赖。因为该包其实是和宿主环境有些依赖是需要共用的，而不需要共用的依赖则可以放在 dependencies 里面。 |
 
 除了上面几个字段，还有一些比较重要的字段（可选的）：
 
@@ -77,7 +78,7 @@ showSponsor: true
     "theme-chalk/src/**/*.scss"
   ],
   "peerDependencies": {
-    "vue": "^3.2.29"
+    "vue": ">=3.2.29"
   },
   "dependencies": {
     "@types/lodash-es": "^4.17.6",
@@ -91,19 +92,18 @@ showSponsor: true
 }
 ```
 
-| 字段名           | 说明                                                         | 是否官方字段 |
-| ---------------- | ------------------------------------------------------------ | ------------ |
-| author           | npm 包的作者名                                               |              |
-| description      | 描述                                                         |              |
-| keywords         | 可以帮助其他人在 npm 搜索列表中发现你的包                    |              |
-| license          | 许可证类型                                                   |              |
-| unpkg            | npm 包入口可以通过链接访问。如：https://unpkg.com/@wishzhang/cvue/dist/index.full.js ，建议带上版本号 | 否           |
-| jsdelivr         | npm 包入口可以通过链接访问。如：https://cdn.jsdelivr.net/npm/@wishzhang/cvue/dist/index.full.js，建议带上版本号 | 否           |
-| repository       | 仓库地址。在 npm 网站上的 npm 包介绍上会展示                 |              |
-| publishConfig    | 发布的配置。可以指定仓库地址。access 为 public 表示发到 npm 网站上 |              |
-| style            | 声明当前模块包含 style 部分，并指定入口文件                  | 否           |
-| sideEffects      | 作用同 files 字段                                            | 否           |
-| peerDependencies | 解决类似的核心依赖库被重复下载的问题。不同库如果都声明了这个字段但里面的依赖版本不同可能会造成不好调试的报错。建议不用这个字段，使用 `dependencies` 字段 |              |
+| 字段名        | 说明                                                         | 是否官方字段 |
+| ------------- | ------------------------------------------------------------ | ------------ |
+| author        | npm 包的作者名                                               |              |
+| description   | 描述                                                         |              |
+| keywords      | 可以帮助其他人在 npm 搜索列表中发现你的包                    |              |
+| license       | 许可证类型                                                   |              |
+| unpkg         | npm 包入口可以通过链接访问。如：https://unpkg.com/@wishzhang/cvue/dist/index.full.js ，建议带上版本号 | 否           |
+| jsdelivr      | npm 包入口可以通过链接访问。如：https://cdn.jsdelivr.net/npm/@wishzhang/cvue/dist/index.full.js，建议带上版本号 | 否           |
+| repository    | 仓库地址。在 npm 网站上的 npm 包介绍上会展示                 |              |
+| publishConfig | 发布的配置。可以指定仓库地址。access 为 public 表示发到 npm 网站上 |              |
+| style         | 声明当前模块包含 style 部分，并指定入口文件                  | 否           |
+| sideEffects   | 作用同 files 字段                                            | 否           |
 
 发布一个npm所需要的主要配置就是这么多了。细节的研究需要去查看 [npm官网的package.json文档](https://docs.npmjs.com/cli/v8/configuring-npm/package-json) 。
 
