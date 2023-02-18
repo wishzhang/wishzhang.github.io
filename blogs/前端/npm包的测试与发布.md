@@ -105,17 +105,11 @@ showSponsor: true
 | sideEffects      | 作用同 files 字段                                            | 否           |
 | peerDependencies | 解决类似的核心依赖库被重复下载的问题。不同库如果都声明了这个字段但里面的依赖版本不同可能会造成不好调试的报错。建议不用这个字段，使用 `dependencies` 字段 |              |
 
-发布一个npm所需要的主要配置就是这么多了。细节的研究需要去查看 [npm官网的package.json文档](https://docs.npmjs.com/cli/v8/configuring-npm/package-json) ，或去 google 或是自己亲手去实验这些字段特性。
+发布一个npm所需要的主要配置就是这么多了。细节的研究需要去查看 [npm官网的package.json文档](https://docs.npmjs.com/cli/v8/configuring-npm/package-json) 。
 
 ## 测试 npm 包
 
-1、切换到 npm 包的 package.json 所在的目录
-
-2、执行 `npm link`
-
-3、在测试项目目录下执行 `npm link 包名@版本号`
-
-OK！如果需要移除这个 npm 包，则在测试项目下执行 `npm unlink 包名@版本号` 。如果 npm 包内容修改了只需要在 npm 包目录下再次执行 `npm link`
+在测试项目目录下执行 `npm install 包本地路径`，或直接拷贝。
 
 ## 发布 npm 包
 
@@ -135,11 +129,25 @@ npm login
 
 执行后命令行会提示输入账号密码。
 
-4、登录成功后，执行 npm 发布命令：
+4、修改 npm 包的版本号
+
+```bash
+npm version <update_type>
+```
+
+<update_type>可以是patch, major, or minor，或者其他遵循语义化版本的值
+
+5、登录成功后，执行 npm 发布命令：
 
 ```bash
 npm publish --access public
 ```
 
-上面的命令带上了 `--access public` 参数，是因为发布的 npm 包名是 @wishzhang/cvue，包含了命名空间。
+上面的命令带上了 `--access public` 参数，是因为包含了命名空间。
+
+6、源码版本打上对应版本的 tag，并发布release
+
+## 管理 npm 包
+
+[Deprecating and undeprecating packages or package versions](https://docs.npmjs.com/deprecating-and-undeprecating-packages-or-package-versions)
 
