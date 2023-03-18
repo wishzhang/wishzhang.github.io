@@ -109,7 +109,7 @@ showSponsor: true
 
 ## 测试 npm 包
 
-在测试项目目录下执行 `npm install 包本地路径`，或直接拷贝。
+npm link
 
 ## 发布 npm 包
 
