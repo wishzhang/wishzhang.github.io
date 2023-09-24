@@ -80,6 +80,84 @@ ok，到这里上面两点约束的基本就可以实现了，完成对基础组
 
 
 
+### beforeUpdate
+
+来说一下beforeUpdate这个什么周期的作用。在实践中遇到一个问题：computed里面包含了dom操作，这是不允许的，因为在mounted之前已经调用了。那么这样就需要在mounted之后赋值，在data里面定义数据了。
+
+vue生命周期的原理（也可参照官方文档），执行mounted生命周期执行完会调用mounted钩子，而mounted生命周期执行完其实已经执行了一遍正常的patch流程。这第一遍的流程不会触发beforeUpdate、updated的流程，而当在mounted的钩子或者之后的响应式数据改变，就会触发beforeUpdate、update流程。
+
+在beforeUpdate钩子中可以做一些改变响应式数据的操作，那么在响应式数据改变后就会触发beforeUpdate流程。看一下这个代码例子：
+```vue
+<template>
+  <div>
+    <div>msg:{{msg}}</div>
+    <div>cmsg:{{cMsg}}</div>
+    <button @click="handleClick"> 点击</button>
+  </div>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        msg: 'hello'
+      }
+    },
+    computed: {
+      cMsg() {
+        console.log('cMsg')
+        return this.msg + 'cMsg'
+      }
+    },
+    mounted() {
+      this.msg = 'dd'
+      console.log('mounted')
+    },
+    beforeUpdate() {
+      console.log('beforeUpdate')
+      this.msg = this.msg + '-beforeUpdate'
+    },
+    updated() {
+      console.log('updated')
+    },
+    methods: {
+      handleClick() {
+        this.msg = 'b'
+      }
+    }
+  }
+</script>
+```
+
+但其实上面的解释是错的，抽象与穷举方法在于数量与变量的变化，对应到归纳法和演绎法。但还需要注意其根基：认识论和基本的逻辑相关性。在上面的例子中，mounted之后并且响应式数据改变了 -> 执行beforeUpdate流程。这个其实是必要但是不充分条件。
+
+从穷举和对单个对象的控制变量发来看，将这段代码注释了结果就会不同：
+
+```vue
+<!--    <div>msg:{{msg}}</div>-->
+<!--    <div>cmsg:{{cMsg}}</div>-->
+```
+
+所以上面的解释应该为：mounted之后 && **视图层的**响应式数据改变了  -> 执行beforeUpdate流程。
+
+
+
+### 命题
+
+**抽象与穷举是用来解释世界网的方法（认识论），真假命题挂在网中的结点。**
+
+这里再来看认识论与知识，知识是可以解释一定量的现象并且失真的命题。但注意是基于认识论，认识论基于人的观察（人与世界的交互），而实际场景是难以描述的，知识几乎是失真的（理论的），最终解决问题的场景需要的是认识、观察、实验、判断，参考知识而避免抽象知识的误导（甚至会和实际场景有矛盾）。
+
+认识论+命题，命题的必要性、充分性、控制变量法等只是一些工具而非底层逻辑。
+
+
+
+最重要的是，现象的不确定性、未知性、人环境的局限性、时效性等等会导致与目的相背离。知识大多都很快会过时也是过眼云烟了，所以，不管黑猫白猫，能捉到老鼠的才是好猫。**而对于个人来说，更多的应该考虑个人。**
+
+
+
+
+
 
 
 
