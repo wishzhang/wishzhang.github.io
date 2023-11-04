@@ -1,4 +1,5 @@
 @echo off
+git pull
 git add .
 timeout /t 1 /nobreak >nul
 git commit -m "update"
