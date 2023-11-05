@@ -1,0 +1,42 @@
+diff --git a/node_modules/vuepress-theme-reco/components/PageInfo.vue b/node_modules/vuepress-theme-reco/components/PageInfo.vue
+index b764f0a..b0041d2 100644
+--- a/node_modules/vuepress-theme-reco/components/PageInfo.vue
++++ b/node_modules/vuepress-theme-reco/components/PageInfo.vue
+@@ -7,10 +7,10 @@
+       <span>{{ pageInfo.frontmatter.author || $themeConfig.author }}</span>
+     </reco-icon>
+     <reco-icon
+-      v-if="pageInfo.frontmatter.date"
++      v-if="pageInfo.lastUpdated"
+       icon="reco-date"
+     >
+-      <span>{{ formatDateValue(pageInfo.frontmatter.date) }}</span>
++      <span>{{ formatDateValue(pageInfo.lastUpdated) }}</span>
+     </reco-icon>
+     <reco-icon
+       v-if="showAccessNumber === true"
+diff --git a/node_modules/vuepress-theme-reco/helpers/utils.js b/node_modules/vuepress-theme-reco/helpers/utils.js
+index eea2aed..f6d4ba1 100644
+--- a/node_modules/vuepress-theme-reco/helpers/utils.js
++++ b/node_modules/vuepress-theme-reco/helpers/utils.js
+@@ -205,8 +205,18 @@ export function getTimeNum (date) {
+ 
+ // 比对时间
+ export function compareDate (a, b) {
+-  const aDateNum = getTimeNum(a.frontmatter.date)
+-  const bDateNum = getTimeNum(b.frontmatter.date)
++  if (a.lastUpdated && b.lastUpdated) {
++    return  compareLastUpdated(a, b)
++  } else {
++    const aDateNum = getTimeNum(a.frontmatter.date)
++    const bDateNum = getTimeNum(b.frontmatter.date)
++    if (aDateNum === 0 || bDateNum === 0) return 0
++    return bDateNum - aDateNum
++  }
++}
++function compareLastUpdated(a, b) {
++  const aDateNum = getTimeNum(a.lastUpdated)
++  const bDateNum = getTimeNum(b.lastUpdated)
+   if (aDateNum === 0 || bDateNum === 0) return 0
+   return bDateNum - aDateNum
+ }

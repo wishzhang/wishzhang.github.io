@@ -37,7 +37,7 @@ categories:
 - 使用媒体查询可区分打印样式和非打印样式，并可以做相应的处理
 - 借助浏览器的打印功能导出pdf，默认打印body.innerHTML内容
 
-因为是浏览器的功能，所以需要注意它的兼容性。
+
 
 下面来看看可能会遇到的问题：
 
@@ -138,6 +138,22 @@ window.addEventListener("afterprint", () => {
 - 需要知道浏览器在打印预览模式下可能会忽略或覆盖一些CSS样式
 
 
+
+4.3 浏览器兼容性问题
+
+因为`window.print()`是浏览器的API，所以需要注意它的兼容性。主要还是样式问题，不同浏览器在打印页面的某些样式处理会不一样。比如：
+
+- 在火狐浏览器使用absolute定位可能会失效
+
+
+
+4.4 修改导出文件的标题
+
+```js
+let tmp = document.title
+window.print()
+document.title = tmp
+```
 
 
 

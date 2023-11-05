@@ -124,7 +124,7 @@ module.exports = {
     "authorAvatar": "/avatar.jpg",
     "record": "粤ICP备2021142243号-1",
     "startYear": "2021",
-    "lastUpdated": false
+    "lastUpdated": '更新时间'
   },
   "markdown":
     {
