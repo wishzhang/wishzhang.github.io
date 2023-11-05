@@ -4,7 +4,7 @@
   "author": "reco_luan",
   "scripts": {
     "dev": "SET NODE_OPTIONS=--openssl-legacy-provider && vuepress dev . --open --host \"localhost\"",
-    "build": "SET NODE_OPTIONS=--openssl-legacy-provider && vuepress build .",
+    "build": "vuepress build .",
     "postinstall": "patch-package"
   },
   "devDependencies": {
