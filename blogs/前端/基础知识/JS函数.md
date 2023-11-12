@@ -107,5 +107,67 @@ let getUpperName = (function(){
 ## 箭头函数
 
 箭头函数表达式的语法比函数表达式更简洁，并且没有自己的this，arguments，super或new.target。  
-箭头函数表达式更适用于那些本来需要匿名函数的地方，不大适合作为对象的方法。没有原型prototype,不能new调用。
+箭头函数表达式更适用于那些本来需要匿名函数的地方，不大适合作为对象的方法。没有原型prototype,不能new调用。使用场景：
+
+- 更简洁的语法
+- 更直观的作用域和this的绑定
+
+
+
+## new Function
+
+这是一种可以将字符串的代码转成函数来执行的方法，浏览器类似的实现方式还有`evel`函数。
+
+使用`new Function`的示例代码：
+
+```js
+let fn = new Function('params', 'data', 'console.log(params, data)');
+fn('a', 'b')
+```
+
+在工程应用上`new Function` 是为了满足特定的需求：
+
+- 需要执行函数字符串代码
+- 在代码交互上和普通的函数使用方式一样，但需要注意一些点：
+  - 字符串有一些限制点
+    - 破坏了js作用域链，作用域直接指向了全局环境。可以访问全局let声明的变量或者window，但是`new Function`外的局部变量却访问不了
+    - 会有安全风险，因为可能执行未经检验的代码
+    - 性能会差点，因为要动态解析和编译字符串中的代码
+
+```js
+let a = 'a'
+function test() {
+  let b = 'b'
+  let fn = new Function('params', 'data', 
+  'console.log(params, data, a)');
+  fn('params', 'data')
+  console.dir(fn)
+}
+
+function test2() {
+  test()
+}
+
+test2()
+```
+
+上面的`fn`函数访问不到变量b，但可以访问全局环境的a。
+
+这里回顾一下函数作用域链：
+
+函数实例会有个私有`[[Scopes]]`属性，这是浏览器用来实现js的作用域的变量，用来表示函数作用域链。作用域链是一个由词法环境组成的列表，它决定了函数可以访问哪些变量和函数。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
