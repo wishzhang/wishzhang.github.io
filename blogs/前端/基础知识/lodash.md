@@ -463,6 +463,77 @@ _.kebabCase('__FOO_BAR__');
 // => 'foo-bar'
 ```
 
+```js
+_.chunk(['a', 'b', 'c', 'd'], 2);
+// => [['a', 'b'], ['c', 'd']]
+ 
+_.chunk(['a', 'b', 'c', 'd'], 3);
+// => [['a', 'b', 'c'], ['d']]
+```
+
+```js
+_.compact([0, 1, undefined,null, false, 2, '', 3])
+// => [1,2,3]
+```
+
+```js
+_.difference([2, 1], [2, 3]);
+// => [1]
+
+console.log(_.differenceBy([2.1, 1.2, 0], [2.3, 3.4, 4.5],[1], Math.floor))
+// => [0]
+// 给第一个数组剔除也在其他数组的元素
+```
+
+```js
+_.intersection([2, 1], [2, 3]);
+// => [2]
+// The `_.property` iteratee shorthand.
+_.intersectionBy([{ 'x': 1 }], [{ 'x': 2 }, { 'x': 1 }], 'x');
+// => [{ 'x': 1 }]
+```
+
+```js
+_.sortedUniq([1, 1, 2]);
+// => [1, 2]
+_.sortedUniqBy([1.1, 1.2, 2.3, 2.4], Math.floor);
+// => [1.1, 2.3]
+```
+
+```js
+_.union([2], [1, 2]);
+// => [2, 1]
+_.unionBy([2.1], [1.2, 2.3], Math.floor);
+// => [2.1, 1.2]
+```
+
+```js
+_.uniq([2, 1, 2]);
+// => [2, 1]
+_.uniqBy([2.1, 1.2, 2.3], Math.floor);
+// => [2.1, 1.2]
+```
+
+```js
+var zipped = _.zip(['a', 'b'], [1, 2], [true, false]);
+// => [['a', 1, true], ['b', 2, false]]
+ 
+_.unzip(zipped);
+// => [['a', 'b'], [1, 2], [true, false]]
+```
+
+```js
+_.xor([2, 1], [2, 3]);
+// => [1, 3]
+_.xorBy([2.1, 1.2], [2.3, 3.4], Math.floor);
+// => [1.2, 3.4]
+```
+
+```js
+_.zipObject(['a', 'b'], [1, 2]);
+// => { 'a': 1, 'b': 2 }
+```
+
 
 
 
