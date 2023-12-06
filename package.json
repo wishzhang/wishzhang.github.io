@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "SET NODE_OPTIONS=--openssl-legacy-provider && vuepress dev . --open --host \"localhost\"",
     "build": "vuepress build .",
+    "patch": "npx patch-package some-package",
     "postinstall": "patch-package"
   },
   "devDependencies": {

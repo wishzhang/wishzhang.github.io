@@ -123,6 +123,7 @@ module.exports = {
     "author": "仰望星空",
     "authorAvatar": "/avatar.jpg",
     "record": "粤ICP备2021142243号-1",
+    "recordLink": "https://beian.miit.gov.cn/",
     "startYear": "2021",
     "lastUpdated": '更新时间'
   },
