@@ -159,19 +159,245 @@ vue生命周期的原理（也可参照官方文档），执行mounted生命周�
 
 
 
+### Symbol
+
+symbol是基础数据类型，像string,数字类型这些类型表示了一定的数值的范围，而symbol目前来看是表示对象的键名的范围。symbol不能序列化也就不能用来保存到数据库，而唯一性只是当前运行环境的唯一性。
+
+那么symbol用在对象的键上，到底解决了什么问题？
+
+**解决的问题是：键名的唯一性，防止名称冲突或被覆盖。因为拿到一个不知道的对象，可以方便地给这个对象加一个键并且保证唯一性。**
+
+#### 创建symbol
+
+有两种方式：一种是使用`Symbol()`每次生成不同的值:
+
+```js
+const symbol1 = Symbol();
+const symbol2 = Symbol();
+
+console.log(symbol1 === symbol2); // false
+```
+
+另一种是`Symbol.for()`:
+
+```js
+const symbol1 = Symbol.for('hi');
+const symbol2 = Symbol.for('hi');
+
+console.log(symbol1 === symbol2); // true
+```
+
+#### 弱封装性
+
+对象上的symbol键默认是不可迭代的，如果需要迭代需要自定义 `Symbol.iterator`
+
+```js
+// 创建一个Symbol
+const MY_SYMBOL = Symbol();
+
+// 创建一个对象
+let obj = {};
+
+// 使用Symbol作为属性键
+obj[MY_SYMBOL] = 'Hello, world!';
+
+// 访问使用Symbol作为键的属性
+console.log(obj[MY_SYMBOL]);  // 输出：'Hello, world!'
+```
 
 
 
+### Object
+
+#### Object.is()
+
+这是一种更精确的方式来对值进行比较，和===不同的是，在处理这几个值的比较上+0 -0 NaN。
+
++0,-0在一些计算上是有表示意义的。NaN表示计算中有出现错误的情况。
+
+> 在JavaScript中，`NaN`（Not a Number）是一种特殊的数值，用于表示某些数学运算的结果未定义或无法表示。使用`NaN`而不是直接抛出错误有几个原因：
+>
+> 1. **容错性**：在某些情况下，程序可能需要继续执行，即使某个操作的结果未定义或无法表示。例如，如果你正在进行一系列的数学运算，其中一个操作的结果是`NaN`，你可能希望忽略这个结果，而让程序继续执行后续的操作。
+> 2. **信息传递**：`NaN`可以传递有关失败操作的信息。例如，如果一个函数返回`NaN`，调用者就知道这个函数的操作失败了。
+> 3. **非阻塞性**：JavaScript是一种非阻塞的语言，意味着它会尽可能地避免抛出导致程序停止的错误。相反，它会返回像`NaN`这样的特殊值，以表示操作失败，然后让程序继续运行。
+>
+> 然而，值得注意的是，虽然`NaN`在某些情况下很有用，但它也可能导致一些混淆。例如，`NaN`不等于任何值，包括其自身。因此，检查一个值是否为`NaN`需要使用特殊的函数，如`isNaN()`。
+
+可以看出一些设计是考虑了JS这门语言的特性和环境。
 
 
 
+### Object.freeze()、Object.seal()、Object.preventExtensions()
+
+> Object.freeze()和Object.seal()都是JavaScript中用于限制对象可修改性的方法，但它们之间有一些重要的区别：
+>
+> Object.freeze()：这个方法会冻结一个对象，使得不能向这个对象添加新的属性，不能删除已有属性，不能修改该对象已有属性的可枚举性、可配置性、可写性，以及不能修改已有属性的值。该对象的原型也不能被重新指定。
+>
+> Object.seal()：这个方法会封闭一个对象，阻止添加新的属性，并将所有现有属性标记为不可配置。当前存在的属性值可以被改变，但不能被删除。
+>
+> 总的来说，Object.freeze()提供了比Object.seal()更严格的限制。如果你想要一个对象完全不可变，你应该使用Object.freeze()。如果你只是想防止添加新的属性，而允许修改现有属性，那么你应该使用Object.seal()。
+
+```js
+let a = {
+  b: 'bb'
+}
+
+let b = Object.create(a)
+
+Object.freeze(b)
+
+a.b = 'cc'
+//b.b = 'cc'
+
+console.log(b.b)
+```
+
+可以看到被冻结的这个对象不能直接修改原型属性值，但是改原型值后可以访问改后的值。
 
 
 
+### lodash两个操作对象的方法
+
+```js
+// 将数组转成对象
+let arr = [
+  {
+    name: 'zhangsan',
+    age: 18
+  },
+  {
+    name: 'lisi',
+    age: 38
+  }
+]
+// 要转成的对象
+let obj = {
+  zhangsan: {
+    name: 'zhangsan',
+    age: 18
+  },
+  lisi: {
+    name: 'lisi',
+    age: 38  
+  }
+}
+
+// 只需要
+_.keyBy(arr, 'name')
+
+// 如果要转成的对象
+let obj = {
+  zhangsan: 18,
+  lisi: 38
+}
+
+// 那么
+_.mapValues(_.keyBy(arr, 'name'), 'age')
+```
+
+如果用原生实现的话：
+
+```js
+let newObj = arr.reduce((obj, el) => { 
+  obj[el.name] = el.age
+}, {})
+
+// 或者
+let newObj = {}
+arr.forEach(el => {
+  newObj[el.name] = el.age
+})
+```
+
+可以看到使用lodash的代码行数最短，如果熟悉lodash的话易理解性相差不多。
 
 
 
+### Number
+
+Number()和+的操作结果一模一样。
+
+```js
+Number(3) // 3
+Number('3') // 3
+typeof Number(3) // "number"
+typeof Number('3') // "number"
+
++'3' // 3
++3 // 3
++-3 // -3
+
+let num = Number(3)
+console.log(num === 3); // true
+
+// 但是
+typeof new Number('3') // "object"
+Number("123abc") // NaN
+Number.parseInt("123abc") // 123
+Number(true) // 1
+```
+
+注意了，传入的值可能是任意类型的话，会进行隐式类型转换，这转换就复杂了。
+
+参考[JavaScript 数据类型和数据结构](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Data_structures)
+
+> 以下是一些在编程实践中注意JavaScript隐式类型转换的建议：
+>
+> 理解隐式类型转换规则：了解JavaScript的隐式类型转换规则，可以帮助我们避免一些常见的错误，编写出更加可靠的代码。
+>
+> 使用严格相等操作符：在使用“==”或“!=”进行比较时，会进行隐式转换，应该尽可能的使用严格相等（“===”或“!==”）操作符进行比较。
+>
+> 避免隐式转换：在编写代码时应尽量避免隐式转换，而是显式地进行类型转换。
 
 
 
+#### 显示转换
+
+> 在JavaScript中，你可以使用以下方法进行显式数据类型转换，当需要转换的时候：
+>
+> 1. **Number()**：将一个值转换为数字。
+>
+> ```javascript
+> let num = Number("123"); // 将字符串转换为数字
+> ```
+>
+> 2. **String()**：将一个值转换为字符串。
+>
+> ```javascript
+> let str = String(123); // 将数字转换为字符串
+> ```
+>
+> 3. **Boolean()**：将一个值转换为布尔值。
+>
+> ```javascript
+> let bool = Boolean(1); // 将数字转换为布尔值
+> ```
+>
+> 4. **parseInt()** 和 **parseFloat()**：将字符串转换为整数或浮点数。
+>
+> ```javascript
+> let int = parseInt("123"); // 将字符串转换为整数
+> let float = parseFloat("123.45"); // 将字符串转换为浮点数
+> ```
+>
+> 5. ~~**.toString()**：将一个值转换为字符串¹。这是一个对象方法，可以用于任何值，除了`null`和`undefined`。~~
+>
+> ```javascript
+> let num = (123).toString(); // 将数字转换为字符串
+> ```
+>
+
+
+
+#### 关于new Number()和Number()
+
+> new Number()和Number()在JavaScript中都可以用来进行类型转换，但它们的行为是有所不同的。
+>
+> new Number()是一个构造函数，它创建一个Number对象。例如，typeof new Number(42)的结果是"object"，并且new Number(42)不等于42（尽管new Number(42) == 42）。
+>
+> Number()是一个函数，当它被调用时，它会将参数强制转换为一个数字原始值。例如，Number("123")会返回数字123。
+>
+> 因此，new Number()和Number()的主要区别在于，new Number()创建的是一个Number对象，而Number()返回的是一个数字原始值。
+>
+> 在实际编程中，通常推荐使用Number()，因为原始值在大多数情况下更易于处理。而且使用new Number()可能会导致一些意想不到的结果，因为它创建的是一个对象，而不是一个简单的数字。
 
