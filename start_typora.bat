@@ -1,0 +1,2 @@
+typora ./blogs
+@echo off

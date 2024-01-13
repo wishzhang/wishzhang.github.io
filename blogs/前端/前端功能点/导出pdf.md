@@ -137,6 +137,8 @@ window.addEventListener("afterprint", () => {
 - 目前能想到的办法是控制打印页面的样式选择器来调试
 - 需要知道浏览器在打印预览模式下可能会忽略或覆盖一些CSS样式
 
+这里来更新一下，Google浏览器、Edge浏览器、Safari浏览器都可以设置模拟打印，可以在devtools调试打印预览页面的样式！
+
 
 
 4.3 浏览器兼容性问题
