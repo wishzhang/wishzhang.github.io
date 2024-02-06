@@ -18,6 +18,8 @@
   "dependencies": {
     "@vuepress-reco/vuepress-plugin-bgm-player": "1.1.4",
     "@vuepress-reco/vuepress-plugin-screenfull": "1.0.1",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "vuepress-plugin-sponsor": "1.0.0"
   }
 }
